@@ -1,6 +1,8 @@
 import http from "http";
 import WebSocket from "ws";
 import express from "express";
+import { parse } from "path";
+import { consumers } from "stream";
 
 const app = express();
 
@@ -28,11 +30,20 @@ const sockets = [];
 // server.js의 socket : 연결된 브라우저
 wss.on("connection", (socket) => {
   sockets.push(socket);
+  socket["nickname"] = "Anon";
   console.log("Connected to Browser");
   socket.on("close", onSocketClose);
   // 메시지를 받았을 때 발생
-  socket.on("message", (message) => {
-    sockets.forEach((aSocket) => aSocket.send(message.toString()));
+  socket.on("message", (msg) => {
+    const message = JSON.parse(msg.toString());
+    switch (message.type) {
+      case "new_message":
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}: ${message.payload}`)
+        );
+      case "nickname":
+        socket["nickname"] = message.payload;
+    }
   });
 });
 

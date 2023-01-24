@@ -4,7 +4,7 @@ const messageForm = document.querySelector("#message");
 // app.js의 socket : 서버로의 연결
 const socket = new WebSocket(`ws://${window.location.host}`);
 
-function makeMessage(type, padyload) {
+function makeMessage(type, payload) {
   const msg = { type, payload };
   return JSON.stringify(msg);
 }
@@ -29,6 +29,9 @@ function handleSubmit(event) {
   event.preventDefault();
   const input = messageForm.querySelector("input");
   socket.send(makeMessage("new_message", input.value));
+  const li = document.createElement("li");
+  li.innerText = `You: ${input.value}`;
+  messageList.append(li);
   input.value = "";
 }
 
@@ -36,6 +39,7 @@ function handleNickSubmit(event) {
   event.preventDefault();
   const input = nickForm.querySelector("input");
   socket.send(makeMessage("nickname", input.value));
+  input.value = "";
 }
 
 messageForm.addEventListener("submit", handleSubmit);
